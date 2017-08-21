@@ -79,7 +79,12 @@ start_input_png (j_compress_ptr cinfo, cjpeg_source_ptr sinfo)
 
     png_set_palette_to_rgb(source->png_ptr);
     png_set_expand_gray_1_2_4_to_8(source->png_ptr);
-    png_set_strip_alpha(source->png_ptr);
+
+    png_color_16 white;
+    white.red = white.blue = white.green = 255;
+
+    png_set_background(source->png_ptr, &white, PNG_BACKGROUND_GAMMA_FILE, 0, 1.0);
+
     png_set_interlace_handling(source->png_ptr);
 
     png_init_io(source->png_ptr, source->pub.input_file);
