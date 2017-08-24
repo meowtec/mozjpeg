@@ -2,6 +2,9 @@
 # Setup
 #
 
+find_program(GCC-AR gcc-ar)
+set(CMAKE_AR ${GCC-AR})
+
 cmake_minimum_required(VERSION 2.8.11)
 # Use LINK_INTERFACE_LIBRARIES instead of INTERFACE_LINK_LIBRARIES
 if(POLICY CMP0022)
@@ -295,16 +298,19 @@ endif()
 if(WITH_12BIT)
   set(COMPILE_FLAGS "-DGIF_SUPPORTED -DPPM_SUPPORTED -DUSE_SETMODE")
 else()
-  set(COMPILE_FLAGS "-DBMP_SUPPORTED -DGIF_SUPPORTED -DPPM_SUPPORTED -DTARGA_SUPPORTED -DUSE_SETMODE")
-  set(CJPEG_BMP_SOURCES rdbmp.c rdtarga.c)
+  set(COMPILE_FLAGS "-DPNG_SUPPORTED -DBMP_SUPPORTED -DGIF_SUPPORTED -DPPM_SUPPORTED -DTARGA_SUPPORTED -DUSE_SETMODE")
+  set(CJPEG_BMP_SOURCES rdpng.c rdbmp.c rdtarga.c)
   set(DJPEG_BMP_SOURCES wrbmp.c wrtarga.c)
 endif()
 
 if(ENABLE_STATIC)
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX})
+  find_package(PNG 1.6 REQUIRED)
+  find_package(ZLIB REQUIRED)
   add_executable(cjpeg-static cjpeg.c cdjpeg.c rdgif.c rdppm.c rdjpeg.c rdswitch.c
     ${CJPEG_BMP_SOURCES})
   set_property(TARGET cjpeg-static PROPERTY COMPILE_FLAGS ${COMPILE_FLAGS})
-  target_link_libraries(cjpeg-static jpeg-static)
+  target_link_libraries(cjpeg-static jpeg-static ${PNG_LIBRARY} ${ZLIB_LIBRARY})
 
   add_executable(djpeg-static djpeg.c cdjpeg.c rdcolmap.c rdswitch.c wrgif.c
     wrppm.c ${DJPEG_BMP_SOURCES})
